@@ -1,11 +1,13 @@
 const express = require('express');
 const { Client, GatewayIntentBits } = require('discord.js');
 const cors = require('cors');
-require('dotenv').config();
+const config = require('./config/config');
 
 const app = express();
+
+// CORS configuration
 app.use(cors({
-    origin: 'http://localhost:3000', // Your React app's URL
+    origin: config.security.corsOrigin,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Accept']
@@ -17,11 +19,29 @@ const _cache = new Set();
 let primaryBot = null;
 let assistantBot = null;
 
+// Validate environment variables
+const requiredEnvVars = [
+    'DISCORD_BOT_TOKEN',
+    'ASSISTANT_BOT_TOKEN',
+    'DISCORD_CHANNEL_ID'
+];
+
+const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
+
+if (missingEnvVars.length > 0) {
+    console.error('Missing required environment variables:', missingEnvVars);
+    process.exit(1);
+}
+
 async function initializeBots() {
     console.log('Starting bot initialization...');
+    console.log('Environment variables check:');
+    console.log('Primary Bot Token:', process.env.DISCORD_BOT_TOKEN ? 'Present' : 'Missing');
+    console.log('Assistant Bot Token:', process.env.ASSISTANT_BOT_TOKEN ? 'Present' : 'Missing');
+    console.log('Channel ID:', process.env.DISCORD_CHANNEL_ID ? 'Present' : 'Missing');
     
-    // Initialize primary bot
-    primaryBot = new Client({
+    // Initialize bots with required intents
+    const botConfig = {
         intents: [
             GatewayIntentBits.Guilds,
             GatewayIntentBits.GuildMessages,
@@ -29,18 +49,10 @@ async function initializeBots() {
             GatewayIntentBits.DirectMessages,
             GatewayIntentBits.GuildMembers
         ]
-    });
+    };
 
-    // Initialize assistant bot
-    assistantBot = new Client({
-        intents: [
-            GatewayIntentBits.Guilds,
-            GatewayIntentBits.GuildMessages,
-            GatewayIntentBits.MessageContent,
-            GatewayIntentBits.DirectMessages,
-            GatewayIntentBits.GuildMembers
-        ]
-    });
+    primaryBot = new Client(botConfig);
+    assistantBot = new Client(botConfig);
 
     console.log('Bots initialized, setting up event handlers...');
 
@@ -112,14 +124,12 @@ async function initializeBots() {
     });
 
     console.log('Attempting to log in bots...');
-    console.log('Primary Bot Token:', process.env.DISCORD_BOT_TOKEN ? 'Present' : 'Missing');
-    console.log('Assistant Bot Token:', process.env.ASSISTANT_BOT_TOKEN ? 'Present' : 'Missing');
 
     try {
         // Login both bots
         await Promise.all([
-            primaryBot.login(process.env.DISCORD_BOT_TOKEN),
-            assistantBot.login(process.env.ASSISTANT_BOT_TOKEN)
+            primaryBot.login(config.discord.botToken),
+            assistantBot.login(config.discord.assistantBotToken)
         ]);
         console.log('Both bots logged in successfully');
     } catch (error) {

@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  backend:
+    build: 
+      context: ./server
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=development
+    env_file:
+      - ./server/.env
+    secrets:
+      - discord_bot_token
+      - assistant_bot_token
+      - discord_channel_id
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/api/test"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+secrets:
+  discord_bot_token:
+    file: ./secrets/discord_bot_token.txt
+  assistant_bot_token:
+    file: ./secrets/assistant_bot_token.txt
+  discord_channel_id:
+    file: ./secrets/discord_channel_id.txt 
