@@ -1,0 +1,53 @@
+.user-selector {
+    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.user-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.user-card {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.user-card:hover {
+    border-color: #7289da;
+    background-color: #f8f9fd;
+}
+
+.user-card.selected {
+    border-color: #7289da;
+    background-color: #f0f3ff;
+    box-shadow: 0 2px 4px rgba(114, 137, 218, 0.2);
+}
+
+.user-avatar {
+    font-size: 2em;
+    margin-right: 15px;
+}
+
+.user-info {
+    flex: 1;
+}
+
+.user-name {
+    font-weight: bold;
+    color: #2f3136;
+}
+
+.user-email {
+    font-size: 0.9em;
+    color: #72767d;
+} 
